@@ -114,15 +114,15 @@ public sealed class NavigatorTouchControls : MonoBehaviour
             new Vector2(0.14f, 0.18f), new Vector2(190, 190),
             new Color(0.08f, 0.10f, 0.16f, 0.48f));
 
-        var stick = baseImage.gameObject.AddComponent<OnScreenStick>();
-        stick.controlPath = "<Gamepad>/leftStick";
-        stick.movementRange = 68f;
-        stick.behaviour = OnScreenStick.Behaviour.RelativePositionWithStaticOrigin;
-
         var knob = CreateImage(baseImage.transform, "Stick Knob",
             new Vector2(0.5f, 0.5f), new Vector2(76, 76),
             new Color(0.88f, 0.91f, 1f, 0.82f));
-        knob.raycastTarget = false;
+        knob.raycastTarget = true;
+
+        var stick = knob.gameObject.AddComponent<OnScreenStick>();
+        stick.controlPath = "<Gamepad>/leftStick";
+        stick.movementRange = 54f;
+        stick.behaviour = OnScreenStick.Behaviour.RelativePositionWithStaticOrigin;
     }
 
     private void CreateButton(Transform parent, string label, string controlPath,
