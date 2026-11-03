@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#080d18">
+  <title>Super Mario Bros Navigator</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; margin: 0; overflow: hidden;
+      background: #080d18; overscroll-behavior: none;
+      -webkit-user-select: none; user-select: none;
+      -webkit-touch-callout: none; touch-action: none;
+    }
+    #game {
+      position: fixed; inset: 0; width: 100vw; height: 100vh;
+      height: 100dvh; display: flex; align-items: stretch; justify-content: stretch;
+      background: #080d18;
+    }
+    #unity-canvas {
+      width: 100%; height: 100%; display: block; outline: none;
+      background: #080d18; touch-action: none;
+    }
+    #fullscreen {
+      position: fixed; z-index: 20; top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      border: 1px solid rgba(255,255,255,.28); border-radius: 12px;
+      padding: 10px 14px; color: #fff; background: rgba(8,13,24,.72);
+      font: 600 14px system-ui, sans-serif; backdrop-filter: blur(8px);
+    }
+    #loading {
+      position: fixed; inset: 0; display: grid; place-items: center;
+      color: white; font: 600 16px system-ui, sans-serif;
+      background: #080d18; z-index: 10;
+    }
+    #error {
+      position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 30;
+      color: #fff; background: #8b1e1e; padding: 12px; border-radius: 8px;
+      font: 13px system-ui, sans-serif; display: none;
+    }
+  </style>
+</head>
+<body>
+  <main id="game">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+  </main>
+  <div id="loading">Carregando Super Mario Bros Navigator…</div>
+  <button id="fullscreen" type="button">Tela cheia ⛶</button>
+  <div id="error" role="alert"></div>
+
+  <script src="Build/{{{ LOADER_FILENAME }}}"></script>
+  <script>
+    const canvas = document.querySelector("#unity-canvas");
+    const loading = document.querySelector("#loading");
+    const errorBox = document.querySelector("#error");
+    let unityInstance = null;
+
+    document.querySelector("#fullscreen").addEventListener("click", async () => {
+      try {
+        if (unityInstance && unityInstance.SetFullscreen) {
+          unityInstance.SetFullscreen(1);
+        } else if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (error) {
+        errorBox.textContent = "O navegador não permitiu ativar a tela cheia: " + error.message;
+        errorBox.style.display = "block";
+      }
+    });
+
+    const config = {
+      dataUrl: "Build/{{{ DATA_FILENAME }}}",
+      frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
+      codeUrl: "Build/{{{ CODE_FILENAME }}}",
+#if MEMORY_FILENAME
+      memoryUrl: "Build/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+      symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
+#endif
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "{{{ COMPANY_NAME }}}",
+      productName: "Super Mario Bros Navigator",
+      productVersion: "{{{ PRODUCT_VERSION }}}",
+      matchWebGLToCanvasSize: true,
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2)
+    };
+
+    createUnityInstance(canvas, config, (progress) => {
+      loading.textContent = "Carregando… " + Math.round(progress * 100) + "%";
+    }).then((instance) => {
+      unityInstance = instance;
+      loading.style.display = "none";
+      document.documentElement.addEventListener("touchmove", (event) => {
+        if (event.target === canvas) event.preventDefault();
+      }, { passive: false });
+    }).catch((message) => {
+      errorBox.textContent = "Não foi possível iniciar o jogo: " + message;
+      errorBox.style.display = "block";
+      loading.style.display = "none";
+    });
+
+    window.addEventListener("resize", () => {
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+    });
+  </script>
+</body>
+</html>
