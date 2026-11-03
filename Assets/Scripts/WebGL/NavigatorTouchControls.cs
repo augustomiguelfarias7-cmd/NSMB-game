@@ -85,8 +85,10 @@ public sealed class NavigatorTouchControls : MonoBehaviour
             DontDestroyOnLoad(eventObject);
         }
 
-        if (eventSystem.GetComponent<InputSystemUIInputModule>() == null)
-            eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
+        var uiModule = eventSystem.GetComponent<InputSystemUIInputModule>();
+        if (uiModule == null)
+            uiModule = eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
+        uiModule.AssignDefaultActions();
 
         var canvasObject = new GameObject("Navigator Touch Canvas",
             typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
